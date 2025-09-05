@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Guide - ConfNG</title>
+    <meta name="description" content="Complete user guide for ConfNG configuration management library. Learn about configuration sources, type safety, and advanced features.">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/docs.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="../index.html">ConfNG</a>
+            </div>
+            <div class="nav-menu" id="nav-menu">
+                <a href="../index.html" class="nav-link">Home</a>
+                <a href="../index.html#features" class="nav-link">Features</a>
+                <a href="../index.html#quick-start" class="nav-link">Quick Start</a>
+                <a href="index.html" class="nav-link active">Documentation</a>
+                <a href="../index.html#examples" class="nav-link">Examples</a>
+                <a href="../api/index.html" class="nav-link">API</a>
+                <a href="https://github.com/confng/confng" class="nav-link" target="_blank">GitHub</a>
+            </div>
+            <div class="nav-toggle" id="nav-toggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="docs-layout">
+        <aside class="docs-sidebar">
+            <div class="sidebar-content">
+                <h3>User Guide</h3>
+                <nav class="sidebar-nav">
+                    <a href="#introduction" class="sidebar-link">Introduction</a>
+                    <a href="#installation" class="sidebar-link">Installation</a>
+                    <a href="#configuration-keys" class="sidebar-link">Configuration Keys</a>
+                    <a href="#configuration-sources" class="sidebar-link">Configuration Sources</a>
+                    <a href="#precedence" class="sidebar-link">Source Precedence</a>
+                    <a href="#type-conversion" class="sidebar-link">Type Conversion</a>
+                    <a href="#sensitive-data" class="sidebar-link">Sensitive Data</a>
+                    <a href="#secret-management" class="sidebar-link">Secret Management</a>
+                    <a href="#custom-sources" class="sidebar-link">Custom Sources</a>
+                    <a href="#performance" class="sidebar-link">Performance</a>
+                    <a href="#testing" class="sidebar-link">Testing</a>
+                    <a href="#best-practices" class="sidebar-link">Best Practices</a>
+                    <a href="#troubleshooting" class="sidebar-link">Troubleshooting</a>
+                </nav>
+            </div>
+        </aside>
+
+        <main class="docs-main">
+            <div class="docs-content">
+                <header class="docs-header">
+                    <h1>ConfNG User Guide</h1>
+                    <p>Complete guide to using ConfNG for configuration management in Java applications.</p>
+                </header>
+
+                <section id="introduction" class="docs-section">
+                    <h2>Introduction</h2>
+                    <p>ConfNG is a lightweight configuration management library designed for Java projects, particularly those using TestNG. It provides a unified way to access configuration values from multiple sources with a defined precedence order and type safety.</p>
+                    
+                    <h3>Key Benefits</h3>
+                    <ul>
+                        <li><strong>Unified Configuration Access</strong>: Single API for multiple configuration sources</li>
+                        <li><strong>Type Safety</strong>: Enum-based configuration keys with compile-time checking</li>
+                        <li><strong>Flexible Precedence</strong>: Configurable source priority with sensible defaults</li>
+                        <li><strong>High Performance</strong>: Eager resolution minimizes runtime overhead</li>
+                        <li><strong>Extensible</strong>: Easy to add custom configuration sources</li>
+                        <li><strong>Secret Management</strong>: Built-in support for secure configuration handling</li>
+                    </ul>
+                </section>
+
+                <section id="installation" class="docs-section">
+                    <h2>Installation</h2>
+                    
+                    <h3>Gradle</h3>
+                    <pre><code class="language-gradle">dependencies {
+    implementation 'org.confng:confng:1.0.0'
+}</code></pre>
+
+                    <h3>Maven</h3>
+                    <pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.confng&lt;/groupId&gt;
+    &lt;artifactId&gt;confng&lt;/artifactId&gt;
+    &lt;version&gt;1.0.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+                    <h3>Requirements</h3>
+                    <ul>
+                        <li>Java 8 or later</li>
+                        <li>TestNG (for test integration)</li>
+                        <li>Gson (for JSON support)</li>
+                        <li>Reflections (for auto-discovery)</li>
+                    </ul>
+                </section>
+
+                <section id="configuration-keys" class="docs-section">
+                    <h2>Configuration Keys</h2>
+                    <p>Configuration keys in ConfNG are defined as enums that implement the <code>ConfNGKey</code> interface. This provides type safety and compile-time checking.</p>
+
+                    <h3>Basic Configuration Keys</h3>
+                    <pre><code class="language-java">import org.confng.api.ConfNGKey;
+
+public enum AppConfig implements ConfNGKey {
+    // Basic keys with defaults
+    BROWSER("browser", "chrome"),
+    BASE_URL("base.url", "http://localhost:8080"),
+    TIMEOUT("timeout", "30"),
+    
+    // Keys without defaults
+    API_KEY("api.key"),
+    DATABASE_URL("database.url");
+    
+    private final String key;
+    private final String defaultValue;
+    
+    AppConfig(String key) {
+        this(key, null);
+    }
+    
+    AppConfig(String key, String defaultValue) {
+        this.key = key;
+        this.defaultValue = defaultValue;
+    }
+    
+    @Override
+    public String getKey() {
+        return key;
+    }
+    
+    @Override
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+}</code></pre>
+
+                    <h3>Sensitive Configuration Keys</h3>
+                    <pre><code class="language-java">public enum SecureConfig implements ConfNGKey {
+    API_SECRET("api.secret", null, true),
+    DB_PASSWORD("db.password", null, true),
+    JWT_SECRET("jwt.secret", null, true);
+    
+    private final String key;
+    private final String defaultValue;
+    private final boolean sensitive;
+    
+    SecureConfig(String key, String defaultValue, boolean sensitive) {
+        this.key = key;
+        this.defaultValue = defaultValue;
+        this.sensitive = sensitive;
+    }
+    
+    @Override
+    public String getKey() {
+        return key;
+    }
+    
+    @Override
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+    
+    @Override
+    public boolean isSensitive() {
+        return sensitive;
+    }
+}</code></pre>
+                </section>
+
+                <section id="configuration-sources" class="docs-section">
+                    <h2>Configuration Sources</h2>
+                    <p>ConfNG supports multiple configuration sources out of the box. Each source is loaded and resolved during initialization for optimal performance.</p>
+
+                    <h3>Environment Variables</h3>
+                    <p>Environment variables are automatically available and have the highest precedence by default.</p>
+                    <pre><code class="language-bash"># Set environment variables
+export BROWSER=firefox
+export BASE_URL=https://staging.example.com
+export TIMEOUT=45</code></pre>
+
+                    <h3>System Properties</h3>
+                    <p>Java system properties are automatically available with second-highest precedence.</p>
+                    <pre><code class="language-bash"># Set system properties
+java -Dbrowser=edge -Dbase.url=https://prod.example.com MyTest</code></pre>
+
+                    <h3>Properties Files</h3>
+                    <pre><code class="language-properties"># test.properties
+browser=safari
+base.url=https://test.example.com
+timeout=60
+parallel.threads=4
+headless=true</code></pre>
+
+                    <pre><code class="language-java">// Load properties file
+ConfNG.loadProperties("test.properties");
+ConfNG.loadProperties("config/environment.properties");</code></pre>
+
+                    <h3>JSON Files</h3>
+                    <pre><code class="language-json">{
+  "browser": "chrome",
+  "base.url": "https://api.example.com",
+  "timeout": 30,
+  "features": {
+    "parallel": true,
+    "headless": false
+  }
+}</code></pre>
+
+                    <pre><code class="language-java">// Load JSON file
+ConfNG.loadJson("config.json");
+ConfNG.loadJson("environments/staging.json");</code></pre>
+                </section>
+
+                <section id="precedence" class="docs-section">
+                    <h2>Source Precedence</h2>
+                    <p>ConfNG resolves configuration values based on source precedence. The first source that contains a value wins.</p>
+
+                    <h3>Default Precedence Order</h3>
+                    <ol>
+                        <li><strong>Environment Variables</strong> (highest precedence)</li>
+                        <li><strong>System Properties</strong></li>
+                        <li><strong>Properties Files</strong> (in order of loading)</li>
+                        <li><strong>JSON Files</strong> (in order of loading)</li>
+                        <li><strong>Custom Sources</strong> (in order of registration)</li>
+                        <li><strong>Default Values</strong> (lowest precedence)</li>
+                    </ol>
+
+                    <h3>Managing Source Precedence</h3>
+                    <pre><code class="language-java">// Clear all sources and start fresh
+ConfNG.clearSourcesAndUseDefaults();
+
+// Add source at specific position (0 = highest precedence)
+ConfNG.registerSourceAt(0, new HighPrioritySource());
+
+// Add source at end (lowest precedence)
+ConfNG.registerSource(new LowPrioritySource());
+
+// Load files in specific order
+ConfNG.loadProperties("default.properties");    // Lower precedence
+ConfNG.loadProperties("environment.properties"); // Higher precedence</code></pre>
+
+                    <h3>Example Resolution</h3>
+                    <pre><code class="language-java">// Given these sources:
+// Environment: BROWSER=firefox
+// System Property: -Dbrowser=chrome
+// Properties file: browser=safari
+// JSON file: "browser": "edge"
+// Default: "chrome"
+
+String browser = ConfNG.get(AppConfig.BROWSER);
+// Result: "firefox" (environment variable wins)</code></pre>
+                </section>
+
+                <section id="type-conversion" class="docs-section">
+                    <h2>Type Conversion</h2>
+                    <p>ConfNG provides automatic type conversion for common data types with proper error handling.</p>
+
+                    <h3>String Values</h3>
+                    <pre><code class="language-java">String browser = ConfNG.get(AppConfig.BROWSER);
+String baseUrl = ConfNG.get(AppConfig.BASE_URL);</code></pre>
+
+                    <h3>Integer Values</h3>
+                    <pre><code class="language-java">Integer timeout = ConfNG.getInt(AppConfig.TIMEOUT);
+Integer threads = ConfNG.getInt(AppConfig.PARALLEL_THREADS);
+
+// Handles null values gracefully
+if (timeout != null) {
+    driver.manage().timeouts().implicitlyWait(timeout, TimeUnit.SECONDS);
+}</code></pre>
+
+                    <h3>Boolean Values</h3>
+                    <pre><code class="language-java">Boolean headless = ConfNG.getBoolean(AppConfig.HEADLESS);
+Boolean parallel = ConfNG.getBoolean(AppConfig.PARALLEL_EXECUTION);
+
+// Accepts: "true", "false" (case-insensitive)
+// Throws IllegalArgumentException for invalid values</code></pre>
+
+                    <h3>Error Handling</h3>
+                    <pre><code class="language-java">try {
+    Integer invalidNumber = ConfNG.getInt(AppConfig.TIMEOUT);
+} catch (IllegalArgumentException e) {
+    // Handle invalid number format
+    System.err.println("Invalid timeout value: " + e.getMessage());
+}
+
+try {
+    Boolean invalidBoolean = ConfNG.getBoolean(AppConfig.HEADLESS);
+} catch (IllegalArgumentException e) {
+    // Handle invalid boolean format
+    System.err.println("Invalid boolean value: " + e.getMessage());
+}</code></pre>
+                </section>
+
+                <section id="sensitive-data" class="docs-section">
+                    <h2>Sensitive Data Handling</h2>
+                    <p>ConfNG provides built-in support for handling sensitive configuration data with automatic masking for logging and display purposes.</p>
+
+                    <h3>Marking Keys as Sensitive</h3>
+                    <pre><code class="language-java">public enum SecureConfig implements ConfNGKey {
+    API_KEY("api.key", null, true),        // Sensitive
+    DB_PASSWORD("db.password", null, true), // Sensitive
+    BASE_URL("base.url", null, false);     // Not sensitive
+    
+    // Implementation with isSensitive() method
+}</code></pre>
+
+                    <h3>Safe Display Methods</h3>
+                    <pre><code class="language-java">// Get actual value (use carefully)
+String apiKey = ConfNG.get(SecureConfig.API_KEY);
+
+// Get masked value for logging
+String maskedKey = ConfNG.getForDisplay(SecureConfig.API_KEY);
+System.out.println("API Key: " + maskedKey); // Prints: API Key: ***MASKED***
+
+// Display all configurations safely
+String allConfigs = ConfNG.getAllForDisplay(SecureConfig.values());
+System.out.println(allConfigs);
+// Output:
+// Configuration Values:
+//   api.key = ***MASKED*** (sensitive)
+//   db.password = ***MASKED*** (sensitive)
+//   base.url = https://api.example.com</code></pre>
+
+                    <h3>Logging Best Practices</h3>
+                    <pre><code class="language-java">@BeforeClass
+public void logConfiguration() {
+    // Safe logging of all configuration
+    logger.info("Test Configuration:\n" + 
+                ConfNG.getAllForDisplay(AppConfig.values()));
+    
+    // Never log sensitive values directly
+    // BAD: logger.info("API Key: " + ConfNG.get(SecureConfig.API_KEY));
+    // GOOD: logger.info("API Key: " + ConfNG.getForDisplay(SecureConfig.API_KEY));
+}</code></pre>
+                </section>
+
+                <section id="secret-management" class="docs-section">
+                    <h2>Secret Management</h2>
+                    <p>ConfNG provides a framework for integrating with secret management systems like AWS Secrets Manager, HashiCorp Vault, and others.</p>
+
+                    <h3>AWS Secrets Manager Integration</h3>
+                    <pre><code class="language-java">import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueResponse;
+
+public class AWSSecretsSource extends SecretManagerSource {
+    private final SecretsManagerClient client;
+    
+    public AWSSecretsSource() {
+        super(300000); // 5 minute cache timeout
+        this.client = SecretsManagerClient.builder()
+            .region(Region.US_EAST_1)
+            .build();
+    }
+    
+    @Override
+    public String getName() {
+        return "AWSSecretsManager";
+    }
+    
+    @Override
+    protected String fetchSecret(String secretId) throws Exception {
+        GetSecretValueRequest request = GetSecretValueRequest.builder()
+            .secretId(secretId)
+            .build();
+        
+        GetSecretValueResponse response = client.getSecretValue(request);
+        return response.secretString();
+    }
+}
+
+// Usage
+AWSSecretsSource secretSource = new AWSSecretsSource();
+secretSource.addKeyMapping("db.password", "prod/database/master-password");
+secretSource.addKeyMapping("api.key", "prod/external-api/key");
+ConfNG.loadSecretSource(secretSource);</code></pre>
+
+                    <h3>HashiCorp Vault Integration</h3>
+                    <pre><code class="language-java">public class VaultSecretsSource extends SecretManagerSource {
+    private final VaultTemplate vaultTemplate;
+    
+    public VaultSecretsSource(VaultTemplate vaultTemplate) {
+        super(600000); // 10 minute cache timeout
+        this.vaultTemplate = vaultTemplate;
+    }
+    
+    @Override
+    public String getName() {
+        return "HashiCorpVault";
+    }
+    
+    @Override
+    protected String fetchSecret(String secretPath) throws Exception {
+        VaultResponse response = vaultTemplate.read(secretPath);
+        if (response != null && response.getData() != null) {
+            return (String) response.getData().get("value");
+        }
+        return null;
+    }
+}
+
+// Usage
+VaultSecretsSource vaultSource = new VaultSecretsSource(vaultTemplate);
+vaultSource.addKeyMapping("jwt.secret", "secret/app/jwt-secret");
+vaultSource.addKeyMapping("encryption.key", "secret/app/encryption-key");
+ConfNG.loadSecretSource(vaultSource);</code></pre>
+
+                    <h3>Caching and Performance</h3>
+                    <pre><code class="language-java">// Configure caching
+SecretManagerSource secretSource = new CustomSecretsSource(
+    300000  // Cache timeout in milliseconds (5 minutes)
+);
+
+// Check cache status
+int cacheSize = secretSource.getCacheSize();
+System.out.println("Cached secrets: " + cacheSize);
+
+// Clear cache if needed
+secretSource.clearCache();</code></pre>
+                </section>
+
+                <section id="custom-sources" class="docs-section">
+                    <h2>Custom Configuration Sources</h2>
+                    <p>You can easily extend ConfNG by implementing custom configuration sources for databases, REST APIs, or other systems.</p>
+
+                    <h3>Database Configuration Source</h3>
+                    <pre><code class="language-java">public class DatabaseConfigSource implements ConfigSource {
+    private final Map&lt;String, String&gt; configCache = new HashMap&lt;&gt;();
+    private final DataSource dataSource;
+    
+    public DatabaseConfigSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+        loadConfigurations();
+    }
+    
+    @Override
+    public String getName() {
+        return "DatabaseConfig";
+    }
+    
+    @Override
+    public Optional&lt;String&gt; get(String key) {
+        return Optional.ofNullable(configCache.get(key));
+    }
+    
+    private void loadConfigurations() {
+        String sql = "SELECT config_key, config_value FROM app_config WHERE active = ?";
+        
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setBoolean(1, true);
+            ResultSet rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                configCache.put(rs.getString("config_key"), rs.getString("config_value"));
+            }
+            
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to load database configuration", e);
+        }
+    }
+    
+    public void refresh() {
+        configCache.clear();
+        loadConfigurations();
+    }
+}</code></pre>
+
+                    <h3>REST API Configuration Source</h3>
+                    <pre><code class="language-java">public class RestApiConfigSource implements ConfigSource {
+    private final Map&lt;String, String&gt; configCache = new HashMap&lt;&gt;();
+    private final String apiUrl;
+    private final String apiKey;
+    
+    public RestApiConfigSource(String apiUrl, String apiKey) {
+        this.apiUrl = apiUrl;
+        this.apiKey = apiKey;
+        loadConfigurations();
+    }
+    
+    @Override
+    public String getName() {
+        return "RestApiConfig";
+    }
+    
+    @Override
+    public Optional&lt;String&gt; get(String key) {
+        return Optional.ofNullable(configCache.get(key));
+    }
+    
+    private void loadConfigurations() {
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(apiUrl + "/config"))
+                .header("Authorization", "Bearer " + apiKey)
+                .header("Accept", "application/json")
+                .build();
+            
+            HttpResponse&lt;String&gt; response = client.send(request, 
+                HttpResponse.BodyHandlers.ofString());
+            
+            if (response.statusCode() == 200) {
+                JsonObject config = JsonParser.parseString(response.body()).getAsJsonObject();
+                for (Map.Entry&lt;String, JsonElement&gt; entry : config.entrySet()) {
+                    configCache.put(entry.getKey(), entry.getValue().getAsString());
+                }
+            }
+            
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load REST API configuration", e);
+        }
+    }
+}</code></pre>
+
+                    <h3>Registering Custom Sources</h3>
+                    <pre><code class="language-java">// Register at end (lowest precedence)
+ConfNG.registerSource(new DatabaseConfigSource(dataSource));
+
+// Register at specific position
+ConfNG.registerSourceAt(1, new RestApiConfigSource(apiUrl, apiKey));
+
+// Register with highest precedence
+ConfNG.registerSourceAt(0, new HighPrioritySource());</code></pre>
+                </section>
+
+                <section id="performance" class="docs-section">
+                    <h2>Performance Optimization</h2>
+                    <p>ConfNG is designed for high performance with eager resolution and efficient caching strategies.</p>
+
+                    <h3>Eager Resolution</h3>
+                    <p>ConfNG resolves all configuration values during initialization, not at runtime:</p>
+                    <pre><code class="language-java">// Values are resolved once during initialization
+ConfNG.loadProperties("config.properties");
+ConfNG.loadJson("config.json");
+
+// Runtime access is just a map lookup - very fast!
+String value = ConfNG.get(AppConfig.BROWSER); // O(1) lookup</code></pre>
+
+                    <h3>Manual Resolution Control</h3>
+                    <pre><code class="language-java">// Force immediate resolution of all values
+ConfNG.resolveAllValues();
+
+// Resolve specific keys only
+Set&lt;String&gt; keysToResolve = Set.of("browser", "base.url", "timeout");
+ConfNG.resolveAllValues(keysToResolve);
+
+// Check resolution status
+boolean isResolved = ConfNG.isResolved();
+int resolvedCount = ConfNG.getResolvedValueCount();
+
+// Refresh all values (re-resolve from sources)
+ConfNG.refresh();</code></pre>
+
+                    <h3>Performance Monitoring</h3>
+                    <pre><code class="language-java">@BeforeClass
+public void setupConfiguration() {
+    long startTime = System.currentTimeMillis();
+    
+    ConfNG.loadProperties("test.properties");
+    ConfNG.loadJson("config.json");
+    ConfNG.resolveAllValues();
+    
+    long endTime = System.currentTimeMillis();
+    int resolvedCount = ConfNG.getResolvedValueCount();
+    
+    System.out.println("Configuration loaded in " + (endTime - startTime) + "ms");
+    System.out.println("Resolved " + resolvedCount + " configuration values");
+}</code></pre>
+
+                    <h3>Memory Usage</h3>
+                    <pre><code class="language-java">// Get all resolved keys for monitoring
+Set&lt;String&gt; resolvedKeys = ConfNG.getResolvedKeys();
+System.out.println("Memory usage: " + resolvedKeys.size() + " keys cached");
+
+// Clear and reload if needed
+ConfNG.refresh(); // Clears cache and reloads</code></pre>
+                </section>
+
+                <section id="testing" class="docs-section">
+                    <h2>Testing with ConfNG</h2>
+                    <p>ConfNG integrates seamlessly with TestNG and provides utilities for test configuration management.</p>
+
+                    <h3>Base Test Class Setup</h3>
+                    <pre><code class="language-java">public abstract class BaseTest {
+    
+    @BeforeSuite(alwaysRun = true)
+    public void setupConfiguration() {
+        // Load configuration in order of precedence
+        ConfNG.loadProperties("test-defaults.properties");
+        ConfNG.loadProperties("test.properties");
+        
+        // Environment-specific configuration
+        String environment = System.getProperty("test.env", "local");
+        ConfNG.loadProperties("environments/" + environment + ".properties");
+        
+        // JSON configuration
+        ConfNG.loadJson("test-config.json");
+        
+        // Force resolution for performance
+        ConfNG.resolveAllValues();
+        
+        // Log configuration summary
+        logConfigurationSummary();
+    }
+    
+    private void logConfigurationSummary() {
+        System.out.println("=== Test Configuration ===");
+        System.out.println("Resolved " + ConfNG.getResolvedValueCount() + " configuration values");
+        System.out.println(ConfNG.getAllForDisplay(TestConfig.values()));
+        System.out.println("========================");
+    }
+}</code></pre>
+
+                    <h3>Environment-Specific Testing</h3>
+                    <pre><code class="language-java">// test-defaults.properties
+browser=chrome
+timeout=30
+headless=false
+parallel.threads=1
+
+// environments/ci.properties  
+headless=true
+parallel.threads=4
+timeout=60
+
+// environments/local.properties
+headless=false
+parallel.threads=1
+base.url=http://localhost:8080</code></pre>
+
+                    <pre><code class="language-bash"># Run tests with different environments
+./gradlew test -Dtest.env=local
+./gradlew test -Dtest.env=ci
+./gradlew test -Dtest.env=staging</code></pre>
+
+                    <h3>Data-Driven Testing</h3>
+                    <pre><code class="language-java">public class WebTest extends BaseTest {
+    
+    @DataProvider(name = "browsers")
+    public Object[][] browserProvider() {
+        String browsers = ConfNG.get(TestConfig.SUPPORTED_BROWSERS);
+        return Arrays.stream(browsers.split(","))
+            .map(browser -&gt; new Object[]{browser.trim()})
+            .toArray(Object[][]::new);
+    }
+    
+    @Test(dataProvider = "browsers")
+    public void testOnMultipleBrowsers(String browser) {
+        String baseUrl = ConfNG.get(TestConfig.BASE_URL);
+        Integer timeout = ConfNG.getInt(TestConfig.TIMEOUT);
+        
+        WebDriver driver = WebDriverFactory.create(browser);
+        driver.manage().timeouts().implicitlyWait(timeout, TimeUnit.SECONDS);
+        
+        // Test implementation
+    }
+}</code></pre>
+
+                    <h3>Configuration Validation in Tests</h3>
+                    <pre><code class="language-java">@Test(priority = 1)
+public void validateConfiguration() {
+    // Ensure required configuration is present
+    assertNotNull(ConfNG.get(TestConfig.BASE_URL), "Base URL must be configured");
+    assertNotNull(ConfNG.get(TestConfig.BROWSER), "Browser must be configured");
+    
+    // Validate configuration values
+    Integer timeout = ConfNG.getInt(TestConfig.TIMEOUT);
+    assertTrue(timeout != null && timeout > 0, "Timeout must be positive");
+    
+    // Validate URLs
+    String baseUrl = ConfNG.get(TestConfig.BASE_URL);
+    assertTrue(baseUrl.startsWith("http"), "Base URL must be a valid HTTP URL");
+}</code></pre>
+                </section>
+
+                <section id="best-practices" class="docs-section">
+                    <h2>Best Practices</h2>
+
+                    <h3>Configuration Key Organization</h3>
+                    <pre><code class="language-java">// Group related configuration keys
+public enum DatabaseConfig implements ConfNGKey {
+    URL("database.url"),
+    USERNAME("database.username"),
+    PASSWORD("database.password", null, true),
+    MAX_CONNECTIONS("database.max.connections", "10");
+    
+    // Implementation...
+}
+
+public enum WebDriverConfig implements ConfNGKey {
+    BROWSER("webdriver.browser", "chrome"),
+    HEADLESS("webdriver.headless", "false"),
+    TIMEOUT("webdriver.timeout", "30"),
+    WINDOW_SIZE("webdriver.window.size", "1920x1080");
+    
+    // Implementation...
+}</code></pre>
+
+                    <h3>Environment-Specific Configuration</h3>
+                    <pre><code class="language-java">// Use consistent naming patterns
+// Environment variables: UPPER_CASE_WITH_UNDERSCORES
+// Properties files: lower.case.with.dots
+// JSON files: camelCase or lower.case.with.dots
+
+public enum AppConfig implements ConfNGKey {
+    // Maps to: BASE_URL env var, base.url property, baseUrl JSON
+    BASE_URL("base.url"),
+    
+    // Maps to: API_KEY env var, api.key property, apiKey JSON  
+    API_KEY("api.key", null, true);
+    
+    // Implementation...
+}</code></pre>
+
+                    <h3>Error Handling</h3>
+                    <pre><code class="language-java">@BeforeClass
+public void setupConfiguration() {
+    try {
+        ConfNG.loadProperties("required-config.properties");
+    } catch (RuntimeException e) {
+        throw new RuntimeException("Failed to load required configuration", e);
+    }
+    
+    // Validate critical configuration
+    validateCriticalConfiguration();
+}
+
+private void validateCriticalConfiguration() {
+    List&lt;String&gt; missingConfig = new ArrayList&lt;&gt;();
+    
+    if (ConfNG.get(AppConfig.BASE_URL) == null) {
+        missingConfig.add("base.url");
+    }
+    
+    if (ConfNG.get(AppConfig.API_KEY) == null) {
+        missingConfig.add("api.key");
+    }
+    
+    if (!missingConfig.isEmpty()) {
+        throw new RuntimeException("Missing required configuration: " + 
+                                 String.join(", ", missingConfig));
+    }
+}</code></pre>
+
+                    <h3>Security Best Practices</h3>
+                    <pre><code class="language-java">// Always mark sensitive keys as sensitive
+public enum SecureConfig implements ConfNGKey {
+    API_SECRET("api.secret", null, true),
+    DB_PASSWORD("db.password", null, true),
+    ENCRYPTION_KEY("encryption.key", null, true);
+    
+    // Implementation with isSensitive() = true
+}
+
+// Use secret management for production
+@BeforeClass
+public void setupSecrets() {
+    if (isProductionEnvironment()) {
+        AWSSecretsSource secretSource = new AWSSecretsSource();
+        secretSource.addKeyMapping("db.password", "prod/db/master-password");
+        secretSource.addKeyMapping("api.secret", "prod/api/secret-key");
+        ConfNG.loadSecretSource(secretSource);
+    }
+}
+
+// Never log sensitive values
+private void logConfiguration() {
+    // GOOD: Uses masking for sensitive values
+    logger.info("Configuration: " + ConfNG.getAllForDisplay(AppConfig.values()));
+    
+    // BAD: Could expose sensitive values
+    // logger.info("API Key: " + ConfNG.get(SecureConfig.API_SECRET));
+}</code></pre>
+
+                    <h3>Performance Best Practices</h3>
+                    <pre><code class="language-java">// Load configuration once in @BeforeSuite
+@BeforeSuite(alwaysRun = true)
+public void setupConfiguration() {
+    // Load all sources
+    ConfNG.loadProperties("config.properties");
+    ConfNG.loadJson("config.json");
+    
+    // Force resolution for better performance
+    ConfNG.resolveAllValues();
+}
+
+// Cache frequently used values in test classes
+public class WebTest extends BaseTest {
+    private static final String BASE_URL = ConfNG.get(TestConfig.BASE_URL);
+    private static final Integer TIMEOUT = ConfNG.getInt(TestConfig.TIMEOUT);
+    
+    @Test
+    public void testSomething() {
+        // Use cached values instead of repeated ConfNG.get() calls
+        driver.get(BASE_URL);
+        driver.manage().timeouts().implicitlyWait(TIMEOUT, TimeUnit.SECONDS);
+    }
+}</code></pre>
+                </section>
+
+                <section id="troubleshooting" class="docs-section">
+                    <h2>Troubleshooting</h2>
+
+                    <h3>Common Issues</h3>
+
+                    <h4>Configuration Not Found</h4>
+                    <pre><code class="language-java">// Debug configuration resolution
+System.out.println("Resolved keys: " + ConfNG.getResolvedKeys());
+System.out.println("Resolved count: " + ConfNG.getResolvedValueCount());
+
+// Check if specific key exists
+String value = ConfNG.get(AppConfig.BROWSER);
+if (value == null) {
+    System.out.println("Browser configuration not found, using default");
+}</code></pre>
+
+                    <h4>Type Conversion Errors</h4>
+                    <pre><code class="language-java">try {
+    Integer timeout = ConfNG.getInt(AppConfig.TIMEOUT);
+} catch (IllegalArgumentException e) {
+    System.err.println("Invalid timeout format: " + e.getMessage());
+    // Use default or handle error
+    Integer timeout = 30; // fallback
+}</code></pre>
+
+                    <h4>File Loading Issues</h4>
+                    <pre><code class="language-java">// Check if files exist before loading
+Path configFile = Paths.get("config.properties");
+if (Files.exists(configFile)) {
+    ConfNG.loadProperties("config.properties");
+} else {
+    System.out.println("Config file not found: " + configFile.toAbsolutePath());
+}
+
+// Use try-catch for better error handling
+try {
+    ConfNG.loadJson("config.json");
+} catch (RuntimeException e) {
+    System.err.println("Failed to load JSON config: " + e.getMessage());
+    // Continue with other sources or use defaults
+}</code></pre>
+
+                    <h3>Debugging Configuration</h3>
+                    <pre><code class="language-java">@BeforeClass
+public void debugConfiguration() {
+    // Enable debug logging
+    System.setProperty("confng.debug", "true");
+    
+    // Load configuration
+    ConfNG.loadProperties("test.properties");
+    ConfNG.resolveAllValues();
+    
+    // Print debug information
+    System.out.println("=== Configuration Debug ===");
+    System.out.println("Is resolved: " + ConfNG.isResolved());
+    System.out.println("Resolved count: " + ConfNG.getResolvedValueCount());
+    System.out.println("Resolved keys: " + ConfNG.getResolvedKeys());
+    System.out.println("All values:");
+    System.out.println(ConfNG.getAllForDisplay(TestConfig.values()));
+    System.out.println("========================");
+}</code></pre>
+
+                    <h3>Performance Issues</h3>
+                    <pre><code class="language-java">// Monitor configuration loading time
+long startTime = System.currentTimeMillis();
+
+ConfNG.loadProperties("large-config.properties");
+ConfNG.resolveAllValues();
+
+long loadTime = System.currentTimeMillis() - startTime;
+if (loadTime > 1000) {
+    System.out.println("WARNING: Configuration loading took " + loadTime + "ms");
+}
+
+// Check memory usage
+Runtime runtime = Runtime.getRuntime();
+long memoryBefore = runtime.totalMemory() - runtime.freeMemory();
+ConfNG.resolveAllValues();
+long memoryAfter = runtime.totalMemory() - runtime.freeMemory();
+System.out.println("Configuration memory usage: " + (memoryAfter - memoryBefore) + " bytes");</code></pre>
+
+                    <h3>Getting Help</h3>
+                    <ul>
+                        <li><a href="https://github.com/confng/confng/issues" target="_blank">Report Issues on GitHub</a></li>
+                        <li><a href="https://github.com/confng/confng/discussions" target="_blank">Join Discussions</a></li>
+                        <li><a href="../api/index.html">Check API Documentation</a></li>
+                        <li><a href="../index.html#examples">Review Examples</a></li>
+                    </ul>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>ConfNG</h3>
+                    <p>Lightweight configuration management for Java projects.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Documentation</h4>
+                    <ul>
+                        <li><a href="index.html">User Guide</a></li>
+                        <li><a href="../api/index.html">API Reference</a></li>
+                        <li><a href="../index.html#examples">Examples</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 ConfNG. Licensed under the MIT License.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="../assets/js/main.js"></script>
+    <script src="../assets/js/docs.js"></script>
+</body>
+</html>
