@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ConfNG - Configuration Management for Java</title>
-    <meta name="description" content="ConfNG is a lightweight configuration management library for Java projects using TestNG. Simplify loading and resolving configuration values from multiple sources.">
+    <meta name="description" content="ConfNG is a lightweight configuration management library designed for TestNG projects with extensible support for other Java applications. Simplify loading and resolving configuration values from multiple sources.">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
@@ -38,10 +38,10 @@
             <div class="container">
                 <div class="hero-content">
                     <h1>ConfNG</h1>
-                    <p class="hero-subtitle">Lightweight Configuration Management for Java</p>
+                    <p class="hero-subtitle">Configuration Management for TestNG Projects</p>
                     <p class="hero-description">
-                        Simplify loading and resolving configuration values from multiple sources 
-                        with precedence-based resolution, type safety, and TestNG integration.
+                        Built for TestNG with extensible support for other Java applications. Simplify loading and resolving configuration values from multiple sources 
+                        with precedence-based resolution, type safety, and automatic TestNG parameter injection.
                     </p>
                     <div class="hero-buttons">
                         <a href="#quick-start" class="btn btn-primary">Get Started</a>
@@ -58,15 +58,22 @@ public enum TestConfig implements ConfNGKey {
     // Implementation...
 }
 
+// Built for TestNG projects with extensible Java support
+// TestNG parameters automatically injected via service loader
+
 // Load configuration sources
 ConfNG.loadProperties("test.properties");
 ConfNG.loadJson("config.json");
 
-// Use in tests
+// TestNG projects: testng.xml parameters are automatically available:
+// &lt;parameter name="browser" value="firefox"/&gt;
+// &lt;parameter name="base.url" value="https://staging.example.com"/&gt;
+
+// Use in TestNG tests or other Java applications
 @Test
-public void testWithConfiguration() {
-    String browser = ConfNG.get(TestConfig.BROWSER);
-    Integer timeout = ConfNG.getInt(TestConfig.TIMEOUT);
+public void testConfiguration() {
+    String browser = ConfNG.get(TestConfig.BROWSER);     // From testng.xml or other sources
+    Integer timeout = ConfNG.getInt(TestConfig.TIMEOUT); // Type-safe conversion
     // Your test logic...
 }</code></pre>
                 </div>
@@ -81,7 +88,7 @@ public void testWithConfiguration() {
                     <div class="feature-card">
                         <div class="feature-icon">🔧</div>
                         <h3>Multiple Sources</h3>
-                        <p>Environment variables, system properties, properties files, JSON files, and custom sources with configurable precedence.</p>
+                        <p>Environment variables, system properties, properties files, JSON files, custom sources, and automatic TestNG parameter injection with configurable precedence.</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">🛡️</div>
@@ -108,6 +115,11 @@ public void testWithConfiguration() {
                         <h3>Extensible</h3>
                         <p>Easy to add custom configuration sources and integrate with existing systems through clean interfaces.</p>
                     </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🧪</div>
+                        <h3>TestNG-First Design</h3>
+                        <p>Built specifically for TestNG projects with zero-configuration parameter injection that automatically captures and injects all parameters from testng.xml, with extensible support for other Java applications.</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -128,14 +140,14 @@ public void testWithConfiguration() {
                                 </div>
                                 <div class="tab-content active" id="gradle">
                                     <pre><code class="language-gradle">dependencies {
-    implementation 'org.confng:confng:1.0.0'
+    implementation 'org.confng:confng:1.0.1'
 }</code></pre>
                                 </div>
                                 <div class="tab-content" id="maven">
                                     <pre><code class="language-xml">&lt;dependency&gt;
     &lt;groupId&gt;org.confng&lt;/groupId&gt;
     &lt;artifactId&gt;confng&lt;/artifactId&gt;
-    &lt;version&gt;1.0.0&lt;/version&gt;
+    &lt;version&gt;1.0.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
                                 </div>
                             </div>
@@ -179,10 +191,13 @@ public enum TestConfig implements ConfNGKey {
                         <div class="step-number">3</div>
                         <div class="step-content">
                             <h3>Load Configuration Sources</h3>
-                            <pre><code class="language-java">import org.confng.ConfNG;
+<parameter name="newStr">                            <pre><code class="language-java">import org.confng.ConfNG;
 
-public class TestBase {
+public class TestConfig {
     static {
+        // Built for TestNG projects, extensible for other Java applications
+        // TestNG parameters are automatically injected when TestNG is present
+        
         // Load configuration files (optional - skipped if not found)
         ConfNG.loadProperties("test.properties");
         ConfNG.loadJson("config.json");
@@ -197,22 +212,52 @@ public class TestBase {
                     <div class="step">
                         <div class="step-number">4</div>
                         <div class="step-content">
-                            <h3>Use in Your Tests</h3>
-                            <pre><code class="language-java">@Test
+                            <h3>Use in TestNG Tests</h3>
+                            <pre><code class="language-java">// Primary use case: TestNG test projects
+
+@Test
 public void testWebApplication() {
+    // TestNG parameters from testng.xml are automatically available!
+    // No listener registration or manual setup required
+    
     // Get configuration values with type safety
-    String browser = ConfNG.get(TestConfig.BROWSER);
-    String baseUrl = ConfNG.get(TestConfig.BASE_URL);
-    Integer timeout = ConfNG.getInt(TestConfig.TIMEOUT);
+    String browser = ConfNG.get(TestConfig.BROWSER);     // From testng.xml or other sources
+    String baseUrl = ConfNG.get(TestConfig.BASE_URL);    // From testng.xml or other sources
+    Integer timeout = ConfNG.getInt(TestConfig.TIMEOUT); // From testng.xml or other sources
     Boolean headless = ConfNG.getBoolean(TestConfig.HEADLESS);
     
-    // Use configuration in your test
+    // Use configuration in your tests
     WebDriver driver = createDriver(browser, headless);
     driver.manage().timeouts().implicitlyWait(timeout, TimeUnit.SECONDS);
     driver.get(baseUrl);
-    
-    // Your test logic here...
+}
+
+// Also works in other Java applications
+public class DatabaseService {
+    public void connect() {
+        String dbUrl = ConfNG.get(AppConfig.DATABASE_URL);
+        String apiKey = ConfNG.get(AppConfig.API_KEY);
+        // Your application logic...
+    }
 }</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">✨</div>
+                        <div class="step-content">
+                            <h3>TestNG-First with Extensible Support</h3>
+                            <p>ConfNG is built for TestNG projects with extensible support for other Java applications:</p>
+                            <ul>
+                                <li>✅ <strong>TestNG-First</strong>: Designed specifically for TestNG test projects</li>
+                                <li>✅ <strong>Automatic Detection</strong>: Detects TestNG on classpath and activates features</li>
+                                <li>✅ <strong>Zero Configuration</strong>: Registers parameter injection listener via service loader</li>
+                                <li>✅ <strong>Parameter Capture</strong>: Captures all testng.xml parameters (suite, test, method levels)</li>
+                                <li>✅ <strong>Smart Precedence</strong>: Handles parameter precedence (method > test > suite)</li>
+                                <li>✅ <strong>Thread-Safe</strong>: Concurrent test execution support</li>
+                                <li>✅ <strong>Extensible</strong>: Can be used in other Java applications when needed</li>
+                            </ul>
+                            <p><strong>Built for TestNG, extensible for more!</strong></p>
                         </div>
                     </div>
                 </div>
@@ -271,8 +316,8 @@ timeout=30
   "timeout": 45
 }
 
-// Java code
-public enum AppConfig implements ConfNGKey {
+// Java code - primarily for TestNG projects
+public enum TestConfig implements ConfNGKey {
     BROWSER("browser", "chrome"),
     BASE_URL("base.url", "http://localhost"),
     TIMEOUT("timeout", "30");
@@ -280,6 +325,7 @@ public enum AppConfig implements ConfNGKey {
     // Constructor and methods...
 }
 
+// In TestNG tests
 @BeforeClass
 public void setup() {
     ConfNG.loadProperties("test.properties");
@@ -288,12 +334,24 @@ public void setup() {
 
 @Test
 public void testApplication() {
-    String browser = ConfNG.get(AppConfig.BROWSER);
-    String url = ConfNG.get(AppConfig.BASE_URL);
-    Integer timeout = ConfNG.getInt(AppConfig.TIMEOUT);
+    String browser = ConfNG.get(TestConfig.BROWSER);
+    String url = ConfNG.get(TestConfig.BASE_URL);
+    Integer timeout = ConfNG.getInt(TestConfig.TIMEOUT);
     
-    // Precedence: Env > System Props > Properties > JSON
+    // Precedence: Env > System Props > TestNG Params > Properties > JSON
     // If BROWSER env var is set, it overrides file values
+    
+    WebDriver driver = createDriver(browser);
+    driver.get(url);
+}
+
+// Also works in other Java applications
+public class ConfigService {
+    public void loadConfig() {
+        ConfNG.loadProperties("app.properties");
+        String value = ConfNG.get(AppConfig.SOME_VALUE);
+        // Use configuration...
+    }
 }</code></pre>
                     </div>
                     
@@ -380,57 +438,76 @@ ConfNG.registerSource(new DatabaseConfigSource(dataSource));</code></pre>
                     </div>
                     
                     <div class="tab-content" id="testng">
-                        <h3>TestNG Integration</h3>
-                        <pre><code class="language-java">// Base test class with ConfNG setup
-public abstract class BaseTest {
+                        <h3>TestNG Integration Features</h3>
+                        <pre><code class="language-java">// ConfNG is built for TestNG projects!
+// When TestNG is detected on classpath, automatic features activate
+
+// testng.xml example:
+// &lt;suite name="Test-Suite"&gt;
+//     &lt;parameter name="browser" value="chrome"/&gt;
+//     &lt;parameter name="base.url" value="https://staging.example.com"/&gt;
+//     &lt;test name="Smoke-Tests"&gt;
+//         &lt;parameter name="browser" value="firefox"/&gt; &lt;!-- Overrides suite level --&gt;
+//         &lt;parameter name="timeout" value="45"/&gt;
+//         &lt;classes&gt;&lt;class name="com.example.SmokeTest"/&gt;&lt;/classes&gt;
+//     &lt;/test&gt;
+//     &lt;test name="Regression-Tests"&gt;
+//         &lt;parameter name="browser" value="edge"/&gt;
+//         &lt;classes&gt;&lt;class name="com.example.RegressionTest"/&gt;&lt;/classes&gt;
+//     &lt;/test&gt;
+// &lt;/suite&gt;
+
+// Configuration enum
+public enum TestConfig implements ConfNGKey {
+    BROWSER("browser", "chrome"),
+    BASE_URL("base.url", "http://localhost:8080"),
+    TIMEOUT("timeout", "30");
     
-    @BeforeSuite(alwaysRun = true)
-    public void setupConfiguration() {
-        // Load configuration sources in order of precedence
-        ConfNG.loadProperties("test.properties");
-        ConfNG.loadJson("config.json");
-        
-        // Add environment-specific configurations
-        String environment = System.getProperty("test.env", "local");
-        ConfNG.loadProperties("config/" + environment + ".properties");
-        
-        // Force resolution of all configuration values
-        ConfNG.resolveAllValues();
-        
-        // Log configuration for debugging
-        System.out.println("Loaded " + ConfNG.getResolvedValueCount() + " configuration values");
-    }
-    
-    @DataProvider(name = "browsers")
-    public Object[][] browserProvider() {
-        String browsers = ConfNG.get(TestConfig.BROWSERS);
-        return Arrays.stream(browsers.split(","))
-            .map(browser -&gt; new Object[]{browser.trim()})
-            .toArray(Object[][]::new);
-    }
+    // Standard implementation...
 }
 
-// Test class using configuration
-public class WebTest extends BaseTest {
+// TestNG test class - automatic parameter injection!
+public class SmokeTest {
     
-    @Test(dataProvider = "browsers")
-    public void testOnMultipleBrowsers(String browser) {
-        String baseUrl = ConfNG.get(TestConfig.BASE_URL);
-        Integer timeout = ConfNG.getInt(TestConfig.TIMEOUT);
+    @Test
+    public void testAutomaticParameterInjection() {
+        // ✨ TestNG feature: parameters automatically injected!
+        // Zero configuration - ConfNG detects TestNG and activates listener
         
-        WebDriver driver = WebDriverFactory.create(browser);
-        driver.manage().timeouts().implicitlyWait(timeout, TimeUnit.SECONDS);
+        String browser = ConfNG.get(TestConfig.BROWSER);     // "firefox" (from test level)
+        String baseUrl = ConfNG.get(TestConfig.BASE_URL);    // "https://staging.example.com" (from suite)
+        Integer timeout = ConfNG.getInt(TestConfig.TIMEOUT); // 45 (from test level)
         
-        // Test implementation...
+        System.out.println("Browser: " + browser);   // firefox
+        System.out.println("Base URL: " + baseUrl);  // https://staging.example.com
+        System.out.println("Timeout: " + timeout);   // 45
+        
+        // TestNG precedence: Method &gt; Test &gt; Suite &gt; Other sources
     }
     
     @Test
-    public void testWithSensitiveData() {
-        String apiKey = ConfNG.get(ApiConfig.SECRET_KEY);
+    public void testMixedSources() {
+        // TestNG parameters work alongside other sources
+        ConfNG.loadProperties("test.properties");
         
-        // For logging, use masked version
-        String maskedKey = ConfNG.getForDisplay(ApiConfig.SECRET_KEY);
-        System.out.println("Using API key: " + maskedKey); // Prints: ***MASKED***
+        // TestNG parameters have high precedence (priority 80)
+        // They override properties files but not env vars or system props
+        String browser = ConfNG.get(TestConfig.BROWSER);
+        
+        // Use in Selenium tests, API tests, etc.
+        WebDriver driver = WebDriverFactory.create(browser);
+        // Test implementation...
+    }
+}
+
+// Extensible: works in other Java applications too
+public class DatabaseService {
+    public void connect() {
+        // Same ConfNG API, no TestNG features (since TestNG not present)
+        ConfNG.loadProperties("app.properties");
+        
+        String dbUrl = ConfNG.get(AppConfig.DATABASE_URL);
+        // Your application logic...
     }
 }</code></pre>
                     </div>
@@ -444,7 +521,7 @@ public class WebTest extends BaseTest {
             <div class="footer-content">
                 <div class="footer-section">
                     <h3>ConfNG</h3>
-                    <p>Lightweight configuration management for Java projects.</p>
+                    <p>Configuration management built for TestNG projects with extensible support for other Java applications.</p>
                     <div class="social-links">
                         <a href="https://github.com/confng/confng" target="_blank">GitHub</a>
                         <a href="https://github.com/confng/confng/issues" target="_blank">Issues</a>
