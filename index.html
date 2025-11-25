@@ -64,6 +64,8 @@ public enum TestConfig implements ConfNGKey {
 // Load configuration sources
 ConfNG.loadProperties("test.properties");
 ConfNG.loadJson("config.json");
+ConfNG.loadYaml("config.yaml");
+ConfNG.loadToml("config.toml");
 
 // TestNG projects: testng.xml parameters are automatically available:
 // &lt;parameter name="browser" value="firefox"/&gt;
@@ -88,7 +90,7 @@ public void testConfiguration() {
                     <div class="feature-card">
                         <div class="feature-icon">🔧</div>
                         <h3>Multiple Sources</h3>
-                        <p>Environment variables, system properties, properties files, JSON files, custom sources, and automatic TestNG parameter injection with configurable precedence.</p>
+                        <p>Environment variables, system properties, properties files, JSON files, YAML files, TOML files, custom sources, and automatic TestNG parameter injection with configurable precedence.</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">🛡️</div>
@@ -140,14 +142,14 @@ public void testConfiguration() {
                                 </div>
                                 <div class="tab-content active" id="gradle">
                                     <pre><code class="language-gradle">dependencies {
-    implementation 'org.confng:confng:1.0.1'
+    implementation 'org.confng:confng:1.0.2'
 }</code></pre>
                                 </div>
                                 <div class="tab-content" id="maven">
                                     <pre><code class="language-xml">&lt;dependency&gt;
     &lt;groupId&gt;org.confng&lt;/groupId&gt;
     &lt;artifactId&gt;confng&lt;/artifactId&gt;
-    &lt;version&gt;1.0.1&lt;/version&gt;
+    &lt;version&gt;1.0.2&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
                                 </div>
                             </div>
@@ -197,11 +199,13 @@ public class TestConfig {
     static {
         // Built for TestNG projects, extensible for other Java applications
         // TestNG parameters are automatically injected when TestNG is present
-        
+
         // Load configuration files (optional - skipped if not found)
         ConfNG.loadProperties("test.properties");
         ConfNG.loadJson("config.json");
-        
+        ConfNG.loadYaml("config.yaml");
+        ConfNG.loadToml("config.toml");
+
         // Add custom sources if needed
         ConfNG.registerSource(new CustomConfigSource());
     }

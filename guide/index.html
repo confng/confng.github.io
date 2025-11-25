@@ -401,21 +401,23 @@ public void afterInvocation(IInvokedMethod method, ITestResult testResult) {
                     
                     <h3>Gradle</h3>
                     <pre><code class="language-gradle">dependencies {
-    implementation 'org.confng:confng:1.0.1'
+    implementation 'org.confng:confng:1.0.2'
 }</code></pre>
 
                     <h3>Maven</h3>
                     <pre><code class="language-xml">&lt;dependency&gt;
     &lt;groupId&gt;org.confng&lt;/groupId&gt;
     &lt;artifactId&gt;confng&lt;/artifactId&gt;
-    &lt;version&gt;1.0.1&lt;/version&gt;
+    &lt;version&gt;1.0.2&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 
                     <h3>Requirements</h3>
                     <ul>
-                        <li>Java 8 or later</li>
+                        <li>Java 11 or later</li>
                         <li>TestNG (for test integration)</li>
                         <li>Gson (for JSON support)</li>
+                        <li>SnakeYAML (for YAML support)</li>
+                        <li>TomlJ (for TOML support)</li>
                         <li>Reflections (for auto-discovery)</li>
                     </ul>
                 </section>
@@ -535,6 +537,63 @@ ConfNG.loadProperties("config/environment.properties");</code></pre>
                     <pre><code class="language-java">// Load JSON file
 ConfNG.loadJson("config.json");
 ConfNG.loadJson("environments/staging.json");</code></pre>
+
+                    <h3>YAML Files</h3>
+                    <p>YAML configuration files provide a clean, human-readable format with support for nested structures and environment-specific sections.</p>
+                    <pre><code class="language-yaml"># config.yaml
+browser: chrome
+base.url: https://api.example.com
+timeout: 30
+features:
+  parallel: true
+  headless: false
+
+# Environment-specific sections
+uat:
+  database:
+    host: uat-db.example.com
+  api:
+    url: https://uat-api.example.com
+
+prod:
+  database:
+    host: prod-db.example.com
+  api:
+    url: https://prod-api.example.com</code></pre>
+
+                    <pre><code class="language-java">// Load YAML file (all top-level keys)
+ConfNG.loadYaml("config.yaml");
+
+// Load specific environment section from YAML file
+ConfNG.loadYaml("config.yaml", "uat");    // Loads only the "uat" section
+ConfNG.loadYaml("config.yaml", "prod");   // Loads only the "prod" section</code></pre>
+
+                    <h3>TOML Files</h3>
+                    <p>TOML configuration files offer a simple, unambiguous format that's easy to read and write, with excellent support for nested structures.</p>
+                    <pre><code class="language-toml"># config.toml
+browser = "chrome"
+base.url = "https://api.example.com"
+timeout = 30
+
+[features]
+parallel = true
+headless = false
+
+# Environment-specific sections
+[uat]
+database.host = "uat-db.example.com"
+api.url = "https://uat-api.example.com"
+
+[prod]
+database.host = "prod-db.example.com"
+api.url = "https://prod-api.example.com"</code></pre>
+
+                    <pre><code class="language-java">// Load TOML file (all top-level keys)
+ConfNG.loadToml("config.toml");
+
+// Load specific environment section from TOML file
+ConfNG.loadToml("config.toml", "uat");    // Loads only the "uat" section
+ConfNG.loadToml("config.toml", "qa");     // Loads only the "qa" section</code></pre>
                 </section>
 
                 <section id="precedence" class="docs-section">
@@ -550,6 +609,8 @@ ConfNG.loadJson("environments/staging.json");</code></pre>
                         <li><strong>TestNG Parameters (suite level)</strong> - automatically injected via listener</li>
                         <li><strong>Properties Files</strong> (in order of loading)</li>
                         <li><strong>JSON Files</strong> (in order of loading)</li>
+                        <li><strong>YAML Files</strong> (in order of loading)</li>
+                        <li><strong>TOML Files</strong> (in order of loading)</li>
                         <li><strong>Custom Sources</strong> (in order of registration)</li>
                         <li><strong>Default Values</strong> (lowest precedence)</li>
                     </ol>
