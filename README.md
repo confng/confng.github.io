@@ -6,39 +6,36 @@ This is the official documentation website for ConfNG, hosted at [confng.org](ht
 
 ```
 site/
-├── index.html              # Homepage with features and quick start
-├── guide/
-│   └── index.html          # Complete user guide
-├── api/
-│   └── index.html          # API reference documentation
-├── migration/
-│   └── index.html          # Migration guide from other libraries
+├── index.html              # Single-page documentation site
+├── 404.html                # Error page
 ├── assets/
 │   ├── css/
-│   │   ├── style.css       # Main stylesheet
-│   │   └── docs.css        # Documentation-specific styles
-│   ├── js/
-│   │   ├── main.js         # Main JavaScript functionality
-│   │   └── docs.js         # Documentation-specific JavaScript
-│   └── images/             # Site images and icons
+│   │   └── main.css        # Main stylesheet
+│   └── js/
+│       └── docs.js         # Documentation JavaScript
+├── netlify.toml            # Netlify deployment configuration
+├── vercel.json             # Vercel deployment configuration
+├── sitemap.xml             # SEO sitemap
+├── robots.txt              # Search engine crawler rules
+├── CNAME                   # Custom domain configuration
 └── README.md               # This file
 ```
 
 ## Features
 
+- **Single-Page Design**: TestNG-inspired documentation-first approach
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
-- **Modern UI**: Clean, professional design with smooth animations
-- **Code Highlighting**: Syntax highlighting for Java, JSON, and other languages
-- **Copy Code**: One-click code copying functionality
-- **Search**: Documentation search functionality
-- **Navigation**: Smooth scrolling and active section highlighting
+- **Clean UI**: Minimal, professional design focused on readability
+- **Code Highlighting**: Syntax highlighting for Java, XML, JSON, Properties, Bash, and Groovy
+- **Smooth Scrolling**: Smooth navigation between sections
+- **TOC Highlighting**: Automatic highlighting of current section in table of contents
 - **Performance**: Optimized for fast loading and smooth interactions
 
 ## Technologies Used
 
 - **HTML5**: Semantic markup
 - **CSS3**: Modern styling with CSS Grid and Flexbox
-- **JavaScript**: Vanilla JS for interactivity
+- **JavaScript**: Vanilla JS for smooth scrolling and TOC highlighting
 - **Prism.js**: Code syntax highlighting
 - **Responsive Design**: Mobile-first approach
 
@@ -49,8 +46,7 @@ site/
 To run the site locally:
 
 1. Clone the repository
-2. Navigate to the `site` directory
-3. Serve the files using any HTTP server:
+2. Serve the files using any HTTP server:
 
 ```bash
 # Using Python
@@ -61,9 +57,12 @@ npx http-server
 
 # Using PHP
 php -S localhost:8000
+
+# Or simply open the file
+open index.html
 ```
 
-4. Open `http://localhost:8000` in your browser
+3. Open `http://localhost:8000` in your browser
 
 ### Building for Production
 
@@ -79,44 +78,56 @@ The site is static HTML/CSS/JS and can be deployed to any web server or CDN:
 
 #### Colors and Theming
 
-Edit CSS custom properties in `assets/css/style.css`:
+Edit CSS in `assets/css/main.css`:
 
 ```css
-:root {
-    --primary-color: #2563eb;
-    --secondary-color: #64748b;
-    /* ... other variables */
+/* Main colors */
+body {
+    color: #333;
+    background: #fff;
+}
+
+.site-header {
+    background: #f8f8f8;
+}
+
+a {
+    color: #0066cc;
 }
 ```
 
 #### Content Updates
 
-- **Homepage**: Edit `index.html`
-- **User Guide**: Edit `guide/index.html`
-- **API Reference**: Edit `api/index.html`
-- **Migration Guide**: Edit `migration/index.html`
+All content is in a single file:
+- **All Documentation**: Edit `index.html`
+- **Error Page**: Edit `404.html`
 
-#### Adding New Pages
+#### Adding New Sections
 
-1. Create new HTML file following the existing structure
-2. Include navigation and footer
-3. Link CSS and JavaScript files
-4. Update navigation menus in all pages
+1. Add new section in `index.html` with unique `id`
+2. Add corresponding link in table of contents sidebar
+3. Update navigation if needed
 
 ## SEO and Analytics
 
 ### Meta Tags
 
-Each page includes appropriate meta tags for SEO:
+The site includes appropriate meta tags for SEO:
 
 - Title tags
 - Meta descriptions
-- Open Graph tags (for social sharing)
-- Canonical URLs
+- Viewport settings for mobile
+
+### Sitemap
+
+The `sitemap.xml` file includes:
+- Main page (https://confng.org/)
+- All major sections (#welcome, #download, #documentation, #examples, #javadocs)
+- JavaDoc site (https://docs.confng.org/)
 
 ### Analytics Integration
 
-To add analytics, include tracking code in each HTML file before the closing `</body>` tag:
+To add analytics, include tracking code in `index.html` before the closing `</body>` tag:
 
 ```html
 <!-- Google Analytics -->
@@ -133,11 +144,11 @@ To add analytics, include tracking code in each HTML file before the closing `</
 
 The site is optimized for performance:
 
-- **Minified CSS/JS**: Consider minifying for production
-- **Image Optimization**: Compress images and use appropriate formats
-- **CDN**: Use CDN for external libraries (Prism.js)
-- **Caching**: Configure appropriate cache headers
-- **Lazy Loading**: Images are lazy-loaded where appropriate
+- **Minimal Dependencies**: Only Prism.js for syntax highlighting
+- **Single Page**: No page reloads, fast navigation
+- **CDN**: Prism.js loaded from CDN
+- **Caching**: Configured in netlify.toml and vercel.json
+- **Lightweight**: Small CSS and JS files
 
 ## Browser Support
 
@@ -164,9 +175,17 @@ The site follows accessibility best practices:
 To contribute to the documentation:
 
 1. Fork the repository
-2. Make changes to the appropriate files in the `site/` directory
-3. Test locally
+2. Make changes to `index.html` or other files
+3. Test locally by opening `index.html` in a browser
 4. Submit a pull request
+
+## Deployment
+
+The site is automatically deployed when changes are pushed to the main branch:
+
+- **GitHub Pages**: Hosted at confng.github.io
+- **Custom Domain**: Available at confng.org (via CNAME)
+- **Netlify/Vercel**: Alternative deployment options configured
 
 ## License
 

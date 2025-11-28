@@ -11,14 +11,28 @@
       "src": "/docs/(.*)",
       "status": 301,
       "headers": {
-        "Location": "/guide/$1"
+        "Location": "/#documentation"
       }
     },
     {
       "src": "/documentation/(.*)",
       "status": 301,
       "headers": {
-        "Location": "/guide/$1"
+        "Location": "/#documentation"
+      }
+    },
+    {
+      "src": "/guide/(.*)",
+      "status": 301,
+      "headers": {
+        "Location": "/#documentation"
+      }
+    },
+    {
+      "src": "/api/(.*)",
+      "status": 301,
+      "headers": {
+        "Location": "/#javadocs"
       }
     }
   ],

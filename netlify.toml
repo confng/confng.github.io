@@ -6,15 +6,25 @@
 [build.environment]
   NODE_VERSION = "18"
 
-# Redirect rules
+# Redirect rules - redirect old paths to main page
 [[redirects]]
   from = "/docs/*"
-  to = "/guide/:splat"
+  to = "/#documentation"
   status = 301
 
 [[redirects]]
   from = "/documentation/*"
-  to = "/guide/:splat"
+  to = "/#documentation"
+  status = 301
+
+[[redirects]]
+  from = "/guide/*"
+  to = "/#documentation"
+  status = 301
+
+[[redirects]]
+  from = "/api/*"
+  to = "/#javadocs"
   status = 301
 
 # Headers for security and performance
