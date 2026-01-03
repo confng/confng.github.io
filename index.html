@@ -42,6 +42,7 @@
                                 <li><a href="#source">2.3. Build from source</a></li>
                             </ol>
                         </li>
+                        <li><a href="#whats-new">2.5. What's New in 1.0.3</a></li>
                         <li><a href="#documentation">3. ConfNG Documentation</a>
                             <ol>
                                 <li><a href="#introduction">3.1. Introduction</a></li>
@@ -49,6 +50,11 @@
                                 <li><a href="#configuration-keys">3.3. Configuration Keys</a></li>
                                 <li><a href="#configuration-sources">3.4. Configuration Sources</a></li>
                                 <li><a href="#testng-integration">3.5. TestNG Integration</a></li>
+                                <li><a href="#typed-getters">3.6. Typed Getters</a></li>
+                                <li><a href="#optional-required">3.7. Optional/Required</a></li>
+                                <li><a href="#validation">3.8. Validation</a></li>
+                                <li><a href="#source-diagnostics">3.9. Source Diagnostics</a></li>
+                                <li><a href="#prefix-retrieval">3.10. Prefix Retrieval</a></li>
                             </ol>
                         </li>
                         <li><a href="#examples">4. Examples</a></li>
@@ -150,12 +156,12 @@ public class SimpleTest {
                     <pre><code class="language-xml">&lt;dependency&gt;
     &lt;groupId&gt;org.confng&lt;/groupId&gt;
     &lt;artifactId&gt;confng&lt;/artifactId&gt;
-    &lt;version&gt;1.0.2&lt;/version&gt;
+    &lt;version&gt;1.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 
                     <h3 id="gradle">2.2. Gradle</h3>
                     <pre><code class="language-groovy">dependencies {
-    implementation 'org.confng:confng:1.0.2'
+    implementation 'org.confng:confng:1.0.3'
 }</code></pre>
 
                     <h3 id="source">2.3. Build from source</h3>
@@ -163,6 +169,34 @@ public class SimpleTest {
                     <pre><code class="language-bash">git clone https://github.com/confng/confng.git
 cd confng
 ./gradlew build</code></pre>
+                </section>
+
+                <section id="whats-new">
+                    <h1>2.5. What's New in 1.0.3</h1>
+                    <p>Version 1.0.3 introduces powerful new features for configuration management:</p>
+
+                    <div class="new-features-grid">
+                        <div class="new-feature-card">
+                            <h4>📊 Typed Configuration Getters</h4>
+                            <p>New <code>getLong()</code>, <code>getDouble()</code>, <code>getList()</code>, and <code>getDuration()</code> methods for type-safe configuration access with human-readable duration parsing.</p>
+                        </div>
+                        <div class="new-feature-card">
+                            <h4>✅ Optional/Required Values</h4>
+                            <p>New <code>getOptional()</code>, <code>getRequired()</code>, and <code>getOrDefault()</code> methods for explicit null handling and fail-fast configuration.</p>
+                        </div>
+                        <div class="new-feature-card">
+                            <h4>🔍 Validation Framework</h4>
+                            <p>Annotation-based validation with <code>@Required</code>, <code>@NotEmpty</code>, <code>@Pattern</code>, and <code>@Range</code> for configuration integrity checks.</p>
+                        </div>
+                        <div class="new-feature-card">
+                            <h4>🔬 Source Diagnostics</h4>
+                            <p>New <code>getSourceInfo()</code> method to see exactly where each configuration value comes from for easier debugging.</p>
+                        </div>
+                        <div class="new-feature-card">
+                            <h4>🏷️ Prefix-based Retrieval</h4>
+                            <p>New <code>getByPrefix()</code> and <code>getKeysWithPrefix()</code> methods for retrieving grouped configuration values.</p>
+                        </div>
+                    </div>
                 </section>
 
                 <section id="documentation">
@@ -281,6 +315,101 @@ retry.count=5</code></pre>
 }</code></pre>
 
                     <p>The TestNG listener is automatically registered via Java's ServiceLoader mechanism. No manual configuration is required!</p>
+
+                    <h3 id="typed-getters">3.6. Typed Configuration Getters</h3>
+                    <p>ConfNG 1.0.3 introduces additional typed getter methods for common data types:</p>
+
+                    <pre><code class="language-java">// Long values
+Long maxFileSize = ConfNG.getLong(AppConfig.MAX_FILE_SIZE);
+
+// Double values
+Double taxRate = ConfNG.getDouble(AppConfig.TAX_RATE);
+
+// List values (comma-separated)
+List&lt;String&gt; allowedOrigins = ConfNG.getList(AppConfig.ALLOWED_ORIGINS);
+// Config: "http://localhost,http://example.com" -> ["http://localhost", "http://example.com"]
+
+// List with custom delimiter
+List&lt;String&gt; features = ConfNG.getList(AppConfig.FEATURES, ";");
+
+// Duration values (human-readable formats)
+Duration timeout = ConfNG.getDuration(AppConfig.SESSION_TIMEOUT);
+// Supports: "30s", "5m", "2h", "1d", "500ms", "PT30S" (ISO-8601)</code></pre>
+
+                    <h3 id="optional-required">3.7. Optional/Required Configuration</h3>
+                    <p>Explicit methods for handling optional and required configuration values:</p>
+
+                    <pre><code class="language-java">// Optional - returns Optional&lt;String&gt;, never null
+Optional&lt;String&gt; apiKey = ConfNG.getOptional(AppConfig.API_KEY);
+apiKey.ifPresent(key -> client.setApiKey(key));
+
+// Required - throws ConfigurationException if missing
+String databaseUrl = ConfNG.getRequired(DatabaseConfig.URL);
+
+// With explicit fallback default
+String browser = ConfNG.getOrDefault(AppConfig.BROWSER, "firefox");
+Integer timeout = ConfNG.getOrDefault(AppConfig.TIMEOUT, 60);</code></pre>
+
+                    <h3 id="validation">3.8. Configuration Validation Framework</h3>
+                    <p>Annotation-based validation for configuration values:</p>
+
+                    <pre><code class="language-java">public enum AppConfig implements ConfNGKey {
+    @Required
+    DATABASE_URL("database.url"),
+
+    @NotEmpty
+    API_KEY("api.key", "default-key"),
+
+    @Range(min = 1, max = 65535)
+    SERVER_PORT("server.port", "8080"),
+
+    @Pattern(regex = "^(debug|info|warn|error)$")
+    LOG_LEVEL("log.level", "info");
+
+    // ... implementation
+}
+
+// Validate configuration
+ValidationResult result = ConfNG.validate(AppConfig.values());
+if (!result.isValid()) {
+    for (ValidationError error : result.getErrors()) {
+        System.err.println(error.getKey() + ": " + error.getMessage());
+    }
+}</code></pre>
+
+                    <h3 id="source-diagnostics">3.9. Configuration Source Diagnostics</h3>
+                    <p>See exactly where each configuration value comes from:</p>
+
+                    <pre><code class="language-java">// Get source info for a single key
+ConfigSourceInfo info = ConfNG.getSourceInfo(AppConfig.DATABASE_URL);
+
+System.out.println("Key: " + info.getKey());           // "database.url"
+System.out.println("Value: " + info.getValue());       // "jdbc:mysql://..." (masked if sensitive)
+System.out.println("Source: " + info.getSourceName()); // "Environment", "SystemProperties", etc.
+System.out.println("Found: " + info.isFound());        // true/false
+System.out.println("Default: " + info.isFromDefault()); // true if using default value
+
+// Get source info for multiple keys
+Map&lt;String, ConfigSourceInfo&gt; infos = ConfNG.getAllSourceInfo(AppConfig.values());</code></pre>
+
+                    <h3 id="prefix-retrieval">3.10. Prefix-based Configuration Retrieval</h3>
+                    <p>Retrieve all configuration values with a common prefix:</p>
+
+                    <pre><code class="language-java">// Get all values with prefix
+Map&lt;String, String&gt; dbConfig = ConfNG.getByPrefix("db.");
+// Returns: {"db.host": "localhost", "db.port": "5432", "db.name": "mydb"}
+
+// Get just the key names
+Set&lt;String&gt; apiKeys = ConfNG.getKeysWithPrefix("api.");
+// Returns: {"api.url", "api.key", "api.version"}
+
+// Use cases: feature flags, tenant config, environment overrides
+Map&lt;String, String&gt; features = ConfNG.getByPrefix("feature.");
+for (Map.Entry&lt;String, String&gt; entry : features.entrySet()) {
+    String featureName = entry.getKey().substring("feature.".length());
+    boolean enabled = Boolean.parseBoolean(entry.getValue());
+    featureManager.setEnabled(featureName, enabled);
+}</code></pre>
                 </section>
 
                 <section id="examples">
