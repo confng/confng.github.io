@@ -39,10 +39,11 @@
                             <ol>
                                 <li><a href="#maven">2.1. Maven</a></li>
                                 <li><a href="#gradle">2.2. Gradle</a></li>
-                                <li><a href="#source">2.3. Build from source</a></li>
+                                <li><a href="#gradle-plugin">2.3. Gradle Plugin</a></li>
+                                <li><a href="#source">2.4. Build from source</a></li>
+                                <li><a href="#whats-new">2.6. What's New</a></li>
                             </ol>
                         </li>
-                        <li><a href="#whats-new">2.5. What's New in 1.0.3</a></li>
                         <li><a href="#documentation">3. ConfNG Documentation</a>
                             <ol>
                                 <li><a href="#introduction">3.1. Introduction</a></li>
@@ -50,11 +51,12 @@
                                 <li><a href="#configuration-keys">3.3. Configuration Keys</a></li>
                                 <li><a href="#configuration-sources">3.4. Configuration Sources</a></li>
                                 <li><a href="#testng-integration">3.5. TestNG Integration</a></li>
-                                <li><a href="#typed-getters">3.6. Typed Getters</a></li>
-                                <li><a href="#optional-required">3.7. Optional/Required</a></li>
-                                <li><a href="#validation">3.8. Validation</a></li>
-                                <li><a href="#source-diagnostics">3.9. Source Diagnostics</a></li>
-                                <li><a href="#prefix-retrieval">3.10. Prefix Retrieval</a></li>
+                                <li><a href="#gradle-plugin-docs">3.6. Gradle Plugin</a></li>
+                                <li><a href="#typed-getters">3.7. Typed Getters</a></li>
+                                <li><a href="#optional-required">3.8. Optional/Required</a></li>
+                                <li><a href="#validation">3.9. Validation</a></li>
+                                <li><a href="#source-diagnostics">3.10. Source Diagnostics</a></li>
+                                <li><a href="#prefix-retrieval">3.11. Prefix Retrieval</a></li>
                             </ol>
                         </li>
                         <li><a href="#examples">4. Examples</a></li>
@@ -156,15 +158,36 @@ public class SimpleTest {
                     <pre><code class="language-xml">&lt;dependency&gt;
     &lt;groupId&gt;org.confng&lt;/groupId&gt;
     &lt;artifactId&gt;confng&lt;/artifactId&gt;
-    &lt;version&gt;1.0.3&lt;/version&gt;
+    &lt;version&gt;1.1.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 
                     <h3 id="gradle">2.2. Gradle</h3>
                     <pre><code class="language-groovy">dependencies {
-    implementation 'org.confng:confng:1.0.3'
+    implementation 'org.confng:confng:1.1.0'
 }</code></pre>
 
-                    <h3 id="source">2.3. Build from source</h3>
+                    <h3 id="gradle-plugin">2.3. Gradle Plugin (Recommended)</h3>
+                    <p>For seamless system property forwarding, add the ConfNG Gradle plugin:</p>
+                    <pre><code class="language-groovy">plugins {
+    id 'org.confng' version '1.1.0'
+}</code></pre>
+                    <p>This automatically forwards all <code>-D</code> flags to the test JVM:</p>
+                    <pre><code class="language-bash">./gradlew test -Dbrowser=firefox -Ddatabase.url=jdbc:mysql://localhost/test</code></pre>
+                    <p>No additional configuration needed - properties are automatically available via <code>ConfNG.get()</code>.</p>
+
+                    <h4>Plugin Configuration (Optional)</h4>
+                    <pre><code class="language-groovy">confng {
+    // Disable automatic forwarding (default: true)
+    forwardSystemProperties = false
+
+    // Only forward properties matching these patterns
+    includePatterns = ['app.', 'database.', 'browser']
+
+    // Exclude properties matching these patterns
+    excludePatterns = ['secret.', 'password']
+}</code></pre>
+
+                    <h3 id="source">2.4. Build from source</h3>
                     <p>To build ConfNG from source:</p>
                     <pre><code class="language-bash">git clone https://github.com/confng/confng.git
 cd confng
@@ -172,10 +195,14 @@ cd confng
                 </section>
 
                 <section id="whats-new">
-                    <h1>2.5. What's New in 1.0.3</h1>
-                    <p>Version 1.0.3 introduces powerful new features for configuration management:</p>
+                    <h1>2.6. What's New in 1.1.0</h1>
+                    <p>Version 1.1.0 introduces the <strong>ConfNG Gradle Plugin</strong> and powerful features for configuration management:</p>
 
                     <div class="new-features-grid">
+                        <div class="new-feature-card">
+                            <h4>🔌 Gradle Plugin</h4>
+                            <p>New <code>org.confng</code> Gradle plugin automatically forwards system properties to test JVM. No more manual <code>systemProperty</code> configuration needed!</p>
+                        </div>
                         <div class="new-feature-card">
                             <h4>📊 Typed Configuration Getters</h4>
                             <p>New <code>getLong()</code>, <code>getDouble()</code>, <code>getList()</code>, and <code>getDuration()</code> methods for type-safe configuration access with human-readable duration parsing.</p>
@@ -316,8 +343,77 @@ retry.count=5</code></pre>
 
                     <p>The TestNG listener is automatically registered via Java's ServiceLoader mechanism. No manual configuration is required!</p>
 
-                    <h3 id="typed-getters">3.6. Typed Configuration Getters</h3>
-                    <p>ConfNG 1.0.3 introduces additional typed getter methods for common data types:</p>
+                    <h3 id="gradle-plugin-docs">3.6. Gradle Plugin</h3>
+                    <p>The ConfNG Gradle Plugin (<code>org.confng</code>) automatically forwards system properties from the Gradle command line to the test JVM. This eliminates the need for manual <code>systemProperty</code> configuration in your build files.</p>
+
+                    <h4>Installation</h4>
+                    <pre><code class="language-groovy">plugins {
+    id 'java'
+    id 'org.confng' version '1.1.0'
+}</code></pre>
+
+                    <h4>Usage</h4>
+                    <p>Once applied, any <code>-D</code> flags passed to Gradle are automatically available in your tests:</p>
+                    <pre><code class="language-bash"># Run tests with custom configuration
+./gradlew test -Dbrowser=firefox -Dbase.url=https://staging.example.com
+
+# All properties are available via ConfNG.get()
+String browser = ConfNG.get(AppConfig.BROWSER);  // "firefox"
+String url = ConfNG.get(AppConfig.BASE_URL);     // "https://staging.example.com"</code></pre>
+
+                    <h4>Configuration Options</h4>
+                    <p>The plugin provides a <code>confng</code> extension for customization:</p>
+                    <pre><code class="language-groovy">confng {
+    // Enable/disable automatic property forwarding (default: true)
+    forwardSystemProperties = true
+
+    // Only forward properties matching these prefixes
+    includePatterns = ['app.', 'database.', 'browser', 'env']
+
+    // Exclude properties matching these patterns (takes precedence over includes)
+    excludePatterns = ['secret.', 'password', 'credential']
+}</code></pre>
+
+                    <h4>Pattern Matching</h4>
+                    <p>The plugin uses prefix matching for filtering:</p>
+                    <ul>
+                        <li><strong>Include patterns:</strong> If specified, only properties starting with these prefixes are forwarded</li>
+                        <li><strong>Exclude patterns:</strong> Properties starting with these prefixes are never forwarded</li>
+                        <li><strong>Precedence:</strong> Exclude patterns take precedence over include patterns</li>
+                    </ul>
+
+                    <pre><code class="language-groovy">confng {
+    // Forward only app.* and db.* properties, but never secrets
+    includePatterns = ['app.', 'db.']
+    excludePatterns = ['app.secret.', 'db.password']
+}
+
+// With this config:
+// -Dapp.name=MyApp        → forwarded
+// -Dapp.secret.key=xxx    → NOT forwarded (excluded)
+// -Ddb.host=localhost     → forwarded
+// -Ddb.password=secret    → NOT forwarded (excluded)
+// -Dother.prop=value      → NOT forwarded (not in includes)</code></pre>
+
+                    <h4>Why Use the Plugin?</h4>
+                    <p>Without the plugin, you need to manually forward each property:</p>
+                    <pre><code class="language-groovy">// Without plugin - manual and error-prone
+test {
+    systemProperty 'browser', System.getProperty('browser')
+    systemProperty 'base.url', System.getProperty('base.url')
+    systemProperty 'timeout', System.getProperty('timeout')
+    // ... repeat for every property
+}</code></pre>
+
+                    <p>With the plugin, all properties are forwarded automatically:</p>
+                    <pre><code class="language-groovy">// With plugin - zero configuration needed!
+plugins {
+    id 'org.confng' version '1.1.0'
+}
+// That's it! All -D properties are automatically available in tests</code></pre>
+
+                    <h3 id="typed-getters">3.7. Typed Configuration Getters</h3>
+                    <p>ConfNG 1.1.0 introduces additional typed getter methods for common data types:</p>
 
                     <pre><code class="language-java">// Long values
 Long maxFileSize = ConfNG.getLong(AppConfig.MAX_FILE_SIZE);
@@ -336,7 +432,7 @@ List&lt;String&gt; features = ConfNG.getList(AppConfig.FEATURES, ";");
 Duration timeout = ConfNG.getDuration(AppConfig.SESSION_TIMEOUT);
 // Supports: "30s", "5m", "2h", "1d", "500ms", "PT30S" (ISO-8601)</code></pre>
 
-                    <h3 id="optional-required">3.7. Optional/Required Configuration</h3>
+                    <h3 id="optional-required">3.8. Optional/Required Configuration</h3>
                     <p>Explicit methods for handling optional and required configuration values:</p>
 
                     <pre><code class="language-java">// Optional - returns Optional&lt;String&gt;, never null
@@ -350,7 +446,7 @@ String databaseUrl = ConfNG.getRequired(DatabaseConfig.URL);
 String browser = ConfNG.getOrDefault(AppConfig.BROWSER, "firefox");
 Integer timeout = ConfNG.getOrDefault(AppConfig.TIMEOUT, 60);</code></pre>
 
-                    <h3 id="validation">3.8. Configuration Validation Framework</h3>
+                    <h3 id="validation">3.9. Configuration Validation Framework</h3>
                     <p>Annotation-based validation for configuration values:</p>
 
                     <pre><code class="language-java">public enum AppConfig implements ConfNGKey {
@@ -377,7 +473,7 @@ if (!result.isValid()) {
     }
 }</code></pre>
 
-                    <h3 id="source-diagnostics">3.9. Configuration Source Diagnostics</h3>
+                    <h3 id="source-diagnostics">3.10. Configuration Source Diagnostics</h3>
                     <p>See exactly where each configuration value comes from:</p>
 
                     <pre><code class="language-java">// Get source info for a single key
@@ -392,7 +488,7 @@ System.out.println("Default: " + info.isFromDefault()); // true if using default
 // Get source info for multiple keys
 Map&lt;String, ConfigSourceInfo&gt; infos = ConfNG.getAllSourceInfo(AppConfig.values());</code></pre>
 
-                    <h3 id="prefix-retrieval">3.10. Prefix-based Configuration Retrieval</h3>
+                    <h3 id="prefix-retrieval">3.11. Prefix-based Configuration Retrieval</h3>
                     <p>Retrieve all configuration values with a common prefix:</p>
 
                     <pre><code class="language-java">// Get all values with prefix
