@@ -57,6 +57,14 @@
                                 <li><a href="#validation">3.9. Validation</a></li>
                                 <li><a href="#source-diagnostics">3.10. Source Diagnostics</a></li>
                                 <li><a href="#prefix-retrieval">3.11. Prefix Retrieval</a></li>
+                                <li><a href="#encryption">3.12. Encryption/Decryption</a></li>
+                                <li><a href="#config-reloading">3.13. Configuration Reloading</a></li>
+                                <li><a href="#metrics-logging">3.14. Metrics & Logging</a></li>
+                                <li><a href="#remote-sources">3.15. Remote Sources</a></li>
+                                <li><a href="#code-generators">3.16. Code Generators</a></li>
+                                <li><a href="#junit5-extension">3.17. JUnit 5 Extension</a></li>
+                                <li><a href="#spring-integration">3.18. Spring Integration</a></li>
+                                <li><a href="#micronaut-integration">3.19. Micronaut Integration</a></li>
                             </ol>
                         </li>
                         <li><a href="#examples">4. Examples</a></li>
@@ -73,10 +81,16 @@
                     <p>Key features include:</p>
                     <ul>
                         <li><strong>Zero-configuration TestNG integration</strong> - TestNG parameters automatically injected via service loader</li>
+                        <li><strong>JUnit 5 Extension</strong> - Full JUnit 5 support with <code>@ConfigValue</code> parameter injection</li>
                         <li><strong>Type-safe configuration</strong> - Enum-based keys with compile-time checking</li>
                         <li><strong>Multiple configuration sources</strong> - Environment variables, system properties, files (Properties, JSON, YAML, TOML), secret managers, and custom sources</li>
+                        <li><strong>Remote sources</strong> - HTTP endpoints, HashiCorp Consul, and Spring Cloud Config Server</li>
+                        <li><strong>Encryption/Decryption</strong> - AES-256-GCM encryption for sensitive values with <code>@Encrypted</code> annotation</li>
+                        <li><strong>Hot-reload</strong> - Configuration reloading without restart with file watching and change listeners</li>
+                        <li><strong>Metrics & Logging</strong> - Track lookups, cache hits, and performance with structured logging</li>
+                        <li><strong>Code generators</strong> - Generate config enums from properties/YAML/JSON files</li>
+                        <li><strong>Framework integrations</strong> - Spring and Micronaut PropertySource support</li>
                         <li><strong>Smart precedence</strong> - Configurable source priority with sensible defaults</li>
-                        <li><strong>Extensible architecture</strong> - Easy to add custom configuration sources</li>
                         <li><strong>Secret management</strong> - Built-in support for AWS, Azure, and HashiCorp Vault</li>
                         <li><strong>Thread-safe</strong> - Safe for concurrent access</li>
                         <li><strong>Lightweight</strong> - Minimal dependencies</li>
@@ -158,18 +172,18 @@ public class SimpleTest {
                     <pre><code class="language-xml">&lt;dependency&gt;
     &lt;groupId&gt;org.confng&lt;/groupId&gt;
     &lt;artifactId&gt;confng&lt;/artifactId&gt;
-    &lt;version&gt;1.1.0&lt;/version&gt;
+    &lt;version&gt;1.1.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 
                     <h3 id="gradle">2.2. Gradle</h3>
                     <pre><code class="language-groovy">dependencies {
-    implementation 'org.confng:confng:1.1.0'
+    implementation 'org.confng:confng:1.1.1'
 }</code></pre>
 
                     <h3 id="gradle-plugin">2.3. Gradle Plugin (Recommended)</h3>
                     <p>For seamless system property forwarding, add the ConfNG Gradle plugin:</p>
                     <pre><code class="language-groovy">plugins {
-    id 'org.confng' version '1.1.0'
+    id 'org.confng' version '1.1.1'
 }</code></pre>
                     <p>This automatically forwards all <code>-D</code> flags to the test JVM:</p>
                     <pre><code class="language-bash">./gradlew test -Dbrowser=firefox -Ddatabase.url=jdbc:mysql://localhost/test</code></pre>
@@ -195,8 +209,8 @@ cd confng
                 </section>
 
                 <section id="whats-new">
-                    <h1>2.6. What's New in 1.1.0</h1>
-                    <p>Version 1.1.0 introduces the <strong>ConfNG Gradle Plugin</strong> and powerful features for configuration management:</p>
+                    <h1>2.6. What's New in 1.1.1</h1>
+                    <p>Version 1.1.1 introduces the <strong>ConfNG Gradle Plugin</strong> and powerful features for configuration management:</p>
 
                     <div class="new-features-grid">
                         <div class="new-feature-card">
@@ -204,24 +218,48 @@ cd confng
                             <p>New <code>org.confng</code> Gradle plugin automatically forwards system properties to test JVM. No more manual <code>systemProperty</code> configuration needed!</p>
                         </div>
                         <div class="new-feature-card">
+                            <h4>🔐 Encryption/Decryption</h4>
+                            <p>Built-in AES-256-GCM encryption for sensitive configuration values with <code>@Encrypted</code> annotation and pluggable encryption providers.</p>
+                        </div>
+                        <div class="new-feature-card">
+                            <h4>🔄 Configuration Reloading</h4>
+                            <p>Hot-reload configuration without restart using <code>ConfigReloadManager</code> with file watching, change listeners, and debouncing.</p>
+                        </div>
+                        <div class="new-feature-card">
+                            <h4>📊 Metrics & Logging</h4>
+                            <p>Track configuration lookups, cache hits, and performance with <code>ConfigMetrics</code>. Structured logging with <code>ConfigLogger</code> and sensitive value masking.</p>
+                        </div>
+                        <div class="new-feature-card">
+                            <h4>🌐 Remote Sources</h4>
+                            <p>Fetch configuration from HTTP endpoints, HashiCorp Consul, and Spring Cloud Config Server with retry logic and caching.</p>
+                        </div>
+                        <div class="new-feature-card">
+                            <h4>⚙️ Code Generators</h4>
+                            <p>Generate configuration enums from properties/YAML/JSON files and create environment-specific templates with <code>ConfigKeyGenerator</code> and <code>TemplateGenerator</code>.</p>
+                        </div>
+                        <div class="new-feature-card">
+                            <h4>🧪 JUnit 5 Extension</h4>
+                            <p>New <code>@ExtendWith(ConfNGExtension.class)</code> for JUnit 5 integration with <code>@ConfigValue</code> parameter injection.</p>
+                        </div>
+                        <div class="new-feature-card">
+                            <h4>🍃 Spring Integration</h4>
+                            <p>Use ConfNG as a Spring <code>PropertySource</code> with <code>ConfNGPropertySource</code> for seamless Spring Boot integration.</p>
+                        </div>
+                        <div class="new-feature-card">
+                            <h4>🚀 Micronaut Integration</h4>
+                            <p>Native Micronaut support with <code>ConfNGPropertySourceLoader</code> for automatic property source loading.</p>
+                        </div>
+                        <div class="new-feature-card">
                             <h4>📊 Typed Configuration Getters</h4>
-                            <p>New <code>getLong()</code>, <code>getDouble()</code>, <code>getList()</code>, and <code>getDuration()</code> methods for type-safe configuration access with human-readable duration parsing.</p>
+                            <p>New <code>getLong()</code>, <code>getDouble()</code>, <code>getList()</code>, and <code>getDuration()</code> methods for type-safe configuration access.</p>
                         </div>
                         <div class="new-feature-card">
                             <h4>✅ Optional/Required Values</h4>
-                            <p>New <code>getOptional()</code>, <code>getRequired()</code>, and <code>getOrDefault()</code> methods for explicit null handling and fail-fast configuration.</p>
+                            <p>New <code>getOptional()</code>, <code>getRequired()</code>, and <code>getOrDefault()</code> methods for explicit null handling.</p>
                         </div>
                         <div class="new-feature-card">
                             <h4>🔍 Validation Framework</h4>
-                            <p>Annotation-based validation with <code>@Required</code>, <code>@NotEmpty</code>, <code>@Pattern</code>, and <code>@Range</code> for configuration integrity checks.</p>
-                        </div>
-                        <div class="new-feature-card">
-                            <h4>🔬 Source Diagnostics</h4>
-                            <p>New <code>getSourceInfo()</code> method to see exactly where each configuration value comes from for easier debugging.</p>
-                        </div>
-                        <div class="new-feature-card">
-                            <h4>🏷️ Prefix-based Retrieval</h4>
-                            <p>New <code>getByPrefix()</code> and <code>getKeysWithPrefix()</code> methods for retrieving grouped configuration values.</p>
+                            <p>Annotation-based validation with <code>@Required</code>, <code>@NotEmpty</code>, <code>@Pattern</code>, and <code>@Range</code>.</p>
                         </div>
                     </div>
                 </section>
@@ -349,7 +387,7 @@ retry.count=5</code></pre>
                     <h4>Installation</h4>
                     <pre><code class="language-groovy">plugins {
     id 'java'
-    id 'org.confng' version '1.1.0'
+    id 'org.confng' version '1.1.1'
 }</code></pre>
 
                     <h4>Usage</h4>
@@ -408,12 +446,12 @@ test {
                     <p>With the plugin, all properties are forwarded automatically:</p>
                     <pre><code class="language-groovy">// With plugin - zero configuration needed!
 plugins {
-    id 'org.confng' version '1.1.0'
+    id 'org.confng' version '1.1.1'
 }
 // That's it! All -D properties are automatically available in tests</code></pre>
 
                     <h3 id="typed-getters">3.7. Typed Configuration Getters</h3>
-                    <p>ConfNG 1.1.0 introduces additional typed getter methods for common data types:</p>
+                    <p>ConfNG 1.1.1 introduces additional typed getter methods for common data types:</p>
 
                     <pre><code class="language-java">// Long values
 Long maxFileSize = ConfNG.getLong(AppConfig.MAX_FILE_SIZE);
@@ -506,6 +544,241 @@ for (Map.Entry&lt;String, String&gt; entry : features.entrySet()) {
     boolean enabled = Boolean.parseBoolean(entry.getValue());
     featureManager.setEnabled(featureName, enabled);
 }</code></pre>
+
+                    <h3 id="encryption">3.12. Encryption/Decryption</h3>
+                    <p>ConfNG provides built-in support for encrypting sensitive configuration values using AES-256-GCM encryption:</p>
+
+                    <pre><code class="language-java">// Set up encryption with a 32-byte key
+byte[] key = "your-32-byte-encryption-key!!!!".getBytes();
+AesEncryptionProvider provider = new AesEncryptionProvider(key);
+EncryptionManager.getInstance().setDefaultProvider(provider);
+
+// Encrypt a value
+String encrypted = EncryptionManager.getInstance().encrypt("my-secret-password");
+// Result: "ENC(base64-encoded-ciphertext)"
+
+// Decrypt a value
+String decrypted = provider.decrypt(encrypted);
+// Result: "my-secret-password"</code></pre>
+
+                    <p>Use the <code>@Encrypted</code> annotation to mark sensitive configuration keys:</p>
+                    <pre><code class="language-java">public enum SecureConfig implements ConfNGKey {
+    @Encrypted
+    DATABASE_PASSWORD("db.password", ""),
+
+    @Encrypted(provider = "custom-provider", failOnError = true)
+    API_SECRET("api.secret", "");
+
+    // ... implementation
+}</code></pre>
+
+                    <h3 id="config-reloading">3.13. Configuration Reloading</h3>
+                    <p>Hot-reload configuration without restarting your application:</p>
+
+                    <pre><code class="language-java">// Get the reload manager
+ConfigReloadManager manager = ConfigReloadManager.getInstance();
+
+// Add a change listener
+manager.addChangeListener(event -> {
+    System.out.println("Config changed: " + event.getChangedKeys());
+    if (event.hasChanged("database.pool.size")) {
+        reconfigureConnectionPool(event.getNewValue("database.pool.size"));
+    }
+});
+
+// Enable auto-reload with file watching
+manager.enableAutoReload();
+
+// Or trigger manual reload
+manager.triggerReload("manual-refresh");</code></pre>
+
+                    <h3 id="metrics-logging">3.14. Metrics & Logging</h3>
+                    <p>Track configuration usage and performance with built-in metrics:</p>
+
+                    <pre><code class="language-java">// Enable metrics
+ConfigMetrics metrics = ConfigMetrics.getInstance();
+metrics.setEnabled(true);
+
+// Record lookups (automatically tracked when integrated)
+metrics.recordLookup("app.name", true, false);  // key, cacheHit, usedDefault
+
+// Get metrics
+long totalLookups = metrics.getTotalLookups();
+long cacheHits = metrics.getCacheHits();
+double hitRate = metrics.getCacheHitRate();
+
+// Export as JSON
+String json = metrics.toJson();</code></pre>
+
+                    <p>Use <code>ConfigLogger</code> for structured logging with sensitive value masking:</p>
+                    <pre><code class="language-java">ConfigLogger logger = ConfigLogger.builder()
+    .logLevel(ConfigLogger.LogLevel.INFO)
+    .maskSensitiveValues(true)
+    .addSensitivePattern("password")
+    .addSensitivePattern("secret")
+    .build();
+
+logger.logConfigAccess("db.password", "****");  // Masked automatically</code></pre>
+
+                    <h3 id="remote-sources">3.15. Remote Configuration Sources</h3>
+                    <p>Fetch configuration from remote services:</p>
+
+                    <h4>HTTP Configuration Source</h4>
+                    <pre><code class="language-java">HttpConfigSource httpSource = HttpConfigSource.builder()
+    .url("https://config-server.example.com/api/config")
+    .headers(Map.of("Authorization", "Bearer token"))
+    .cacheTimeSeconds(300)
+    .maxRetries(3)
+    .build();
+
+ConfNG.addSource(httpSource);</code></pre>
+
+                    <h4>HashiCorp Consul</h4>
+                    <pre><code class="language-java">ConsulConfigSource consulSource = ConsulConfigSource.builder()
+    .host("consul.example.com")
+    .port(8500)
+    .prefix("myapp/config/")
+    .token("consul-acl-token")
+    .build();
+
+ConfNG.addSource(consulSource);</code></pre>
+
+                    <h4>Spring Cloud Config Server</h4>
+                    <pre><code class="language-java">SpringCloudConfigSource springSource = SpringCloudConfigSource.builder()
+    .baseUrl("http://config-server:8888")
+    .application("myapp")
+    .profile("production")
+    .label("main")
+    .build();
+
+ConfNG.addSource(springSource);</code></pre>
+
+                    <h3 id="code-generators">3.16. Code Generators</h3>
+                    <p>Generate configuration enums from existing configuration files:</p>
+
+                    <pre><code class="language-java">// Generate from properties file
+String enumCode = ConfigKeyGenerator.generateFromProperties(
+    "src/main/resources/application.properties",
+    "com.example.config",
+    "AppConfig"
+);
+
+// Generate from YAML file
+String yamlEnumCode = ConfigKeyGenerator.generateFromYaml(
+    "src/main/resources/application.yml",
+    "com.example.config",
+    "AppConfig"
+);
+
+// Generate from JSON schema
+String jsonEnumCode = ConfigKeyGenerator.generateFromJsonSchema(
+    "src/main/resources/config-schema.json",
+    "com.example.config",
+    "AppConfig"
+);</code></pre>
+
+                    <p>Generate environment-specific configuration templates:</p>
+                    <pre><code class="language-java">// Generate properties template
+String propsTemplate = TemplateGenerator.generatePropertiesTemplate(
+    AppConfig.values(),
+    "Production configuration template"
+);
+
+// Generate YAML template
+String yamlTemplate = TemplateGenerator.generateYamlTemplate(
+    AppConfig.values(),
+    "Production configuration template"
+);
+
+// Generate JSON template
+String jsonTemplate = TemplateGenerator.generateJsonTemplate(
+    AppConfig.values(),
+    "Production configuration template"
+);</code></pre>
+
+                    <h3 id="junit5-extension">3.17. JUnit 5 Extension</h3>
+                    <p>Use ConfNG with JUnit 5 tests:</p>
+
+                    <pre><code class="language-xml">&lt;!-- Add the JUnit 5 extension dependency --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.confng&lt;/groupId&gt;
+    &lt;artifactId&gt;confng-junit5-extension&lt;/artifactId&gt;
+    &lt;version&gt;1.1.1&lt;/version&gt;
+    &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+
+                    <pre><code class="language-java">import org.confng.junit5.ConfNGExtension;
+import org.confng.junit5.ConfigValue;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+@ExtendWith(ConfNGExtension.class)
+public class MyJUnit5Test {
+
+    @ConfigValue(key = "app.name")
+    private String appName;
+
+    @ConfigValue(key = "app.timeout", defaultValue = "30")
+    private int timeout;
+
+    @Test
+    void testWithInjectedConfig() {
+        assertNotNull(appName);
+        assertTrue(timeout > 0);
+    }
+}</code></pre>
+
+                    <h3 id="spring-integration">3.18. Spring Integration</h3>
+                    <p>Use ConfNG as a Spring PropertySource:</p>
+
+                    <pre><code class="language-java">import org.confng.integration.spring.ConfNGPropertySource;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.ConfigurableEnvironment;
+
+@Configuration
+public class ConfNGSpringConfig {
+
+    public ConfNGSpringConfig(ConfigurableEnvironment environment) {
+        // Add ConfNG as a property source with high priority
+        environment.getPropertySources().addFirst(
+            new ConfNGPropertySource("confng")
+        );
+    }
+}
+
+// Now use @Value annotations as usual
+@Component
+public class MyService {
+    @Value("${app.name}")
+    private String appName;
+
+    @Value("${database.url}")
+    private String databaseUrl;
+}</code></pre>
+
+                    <h3 id="micronaut-integration">3.19. Micronaut Integration</h3>
+                    <p>ConfNG integrates seamlessly with Micronaut:</p>
+
+                    <pre><code class="language-java">import org.confng.integration.micronaut.ConfNGPropertySourceLoader;
+import io.micronaut.context.env.PropertySourceLoader;
+
+// Register via ServiceLoader (META-INF/services/io.micronaut.context.env.PropertySourceLoader)
+// or programmatically:
+
+public class Application {
+    public static void main(String[] args) {
+        Micronaut.build(args)
+            .propertySources(new ConfNGPropertySourceLoader())
+            .start();
+    }
+}
+
+// Use @Value or @ConfigurationProperties as usual
+@Singleton
+public class MyService {
+    @Value("${app.name}")
+    private String appName;
+}</code></pre>
                 </section>
 
                 <section id="examples">
@@ -559,7 +832,7 @@ for (Map.Entry&lt;String, String&gt; entry : features.entrySet()) {
         </div>
     </main>
     <footer>
-        <p>&copy; 2024 ConfNG Team | <a href="mailto:team@confng.org">team@confng.org</a></p>
+        <p>&copy; 2024-2026 ConfNG Team | <a href="mailto:team@confng.org">team@confng.org</a></p>
     </footer>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
